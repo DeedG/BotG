@@ -4,7 +4,7 @@ import { ColorResolvable, MessageEmbed } from 'discord.js'
 var AsciiTable = require('ascii-table');
 
 const riotkey = process.env.RIOTKEY
-let id = '';
+let id: string;
 let match = '';
 let cNameTeam: any;
 let gameDuration: any;
@@ -22,7 +22,7 @@ let type = '';
 let patch = '';
 let win: boolean;
 let win_ = '';
-let color : ColorResolvable = '#000000';
+let color: ColorResolvable = '#000000';
 let iconId = '';
 export default {
     category: 'API',
@@ -38,6 +38,7 @@ export default {
 
     callback: async ({ args, interaction }) => {
         await getId(args);
+        console.log(id)
         await getLast(id);
         let url = `https://europe.api.riotgames.com/lol/match/v5/matches/${match}?${riotkey}`
 
@@ -66,10 +67,10 @@ export default {
 
                 var table = new AsciiTable()
                 table
-                    .setHeading('Joueur', 'Champion', 'CS', 'KDA','Damage')
+                    .setHeading('Joueur', 'Champion', 'CS', 'KDA', 'Damage')
                     .addRow('Team Bleu')
                 for (let i = 0; i < res.data.info.participants.length; i++) {
-                    table.addRow(summonerName[i], championName[i], cs[i], kda[i],totalDamageDealt[i])
+                    table.addRow(summonerName[i], championName[i], cs[i], kda[i], totalDamageDealt[i])
                     table.removeBorder()
                     if (i == 4) {
                         table.addRow('\u200B')
@@ -78,25 +79,25 @@ export default {
 
                 }
 
-                if (win){
+                if (win) {
                     win_ = 'VICTOIRE';
                     color = '#00ff00';
-                } 
+                }
                 else {
                     win_ = 'DÉFAITE';
                     color = '#ff0000';
                 }
                 console.log(table.toString())
-                
+
                 const exampleEmbed = new MessageEmbed()
                     .setColor(color)
                     .setTitle(win_)
-                    .setAuthor({ name: cName, iconURL: `http://ddragon.leagueoflegends.com/cdn/12.4.1/img/profileicon/${iconId}.png`})
+                    .setAuthor({ name: cName, iconURL: `http://ddragon.leagueoflegends.com/cdn/12.4.1/img/profileicon/${iconId}.png` })
                     .setDescription(`𝗠𝗼𝗱𝗲: ${type} \n𝗣𝗮𝘁𝗰𝗵: ${patch} \n`)
                     .addFields(
-                        { name: 'Dernière game', value:"```"+`${table.toString()}`+"```"},
+                        { name: 'Dernière game', value: "```" + `${table.toString()}` + "```" },
                     )
-                    .setFooter({ text: `𝘋𝘶𝘳𝘦́𝘦 ${minutes}:${seconds} \u200B \u200B \u200B \u200B`});
+                    .setFooter({ text: `𝘋𝘶𝘳𝘦́𝘦 ${minutes}:${seconds} \u200B \u200B \u200B \u200B` });
                 interaction.reply({ embeds: [exampleEmbed] });
 
 
@@ -110,18 +111,30 @@ export default {
 
 async function getId(name: any) {
     let url = `https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${name}?${riotkey}`
+    let encoded = encodeURI(url)
+    
 
-    const { data } = await axios.get(url)
+    try {
+        const { data } = await axios.get(encoded)
+        id = data.puuid;
+        cName = data.name;
+        iconId = data.profileIconId;
+    } catch (error) {
+        console.error(error);
 
-    id = data.puuid;
-    cName = data.name;
-    iconId = data.profileIconId;
+    }
 }
 
 async function getLast(id: any) {
     let url = `https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/${id}/ids?start=0&count=1&${riotkey}`
 
-    const { data } = await axios.get(url)
+    try {
+        const { data } = await axios.get(url)
+        match = data[0];
+    } catch (error) {
+        console.error(error);
 
-    match = data[0];
+    }
+
 }
+
