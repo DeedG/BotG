@@ -1,1 +1,1 @@
-worker: node --loader ts-node/esm ./index.ts
+worker: ts-node index.ts
