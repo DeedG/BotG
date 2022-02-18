@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { ICommand } from 'wokcommands'
+import { ColorResolvable, MessageEmbed } from 'discord.js'
 var AsciiTable = require('ascii-table');
 
 const riotkey = process.env.RIOTKEY
@@ -19,13 +20,14 @@ let teamId: number[] = [];
 let rep = '';
 let type = '';
 let patch = '';
-let win : boolean;
+let win: boolean;
 let win_ = '';
+let color : ColorResolvable = '#000000';
+let iconId = '';
 export default {
     category: 'API',
     description: 'Exemple de requete',
 
-    permissions: ['ADMINISTRATOR'],
 
     minArgs: 1,
     maxArgs: 1,
@@ -54,7 +56,6 @@ export default {
                     championName[i] = res.data.info.participants[i].championName;
                     cs[i] = res.data.info.participants[i].totalMinionsKilled + res.data.info.participants[i].neutralMinionsKilled;
                     kda[i] = `${res.data.info.participants[i].kills}/${res.data.info.participants[i].deaths}/${res.data.info.participants[i].assists}`;
-                    goldEarned[i] = res.data.info.participants[i].goldEarned;
                     totalDamageDealt[i] = res.data.info.participants[i].totalDamageDealtToChampions;
                     teamId[i] = res.data.info.participants[i].teamId;
                 }
@@ -65,27 +66,40 @@ export default {
 
                 var table = new AsciiTable()
                 table
-                    .setHeading('Joueur', 'Champion', 'CS', 'KDA', 'Gold', 'Damage')
+                    .setHeading('Joueur', 'Champion', 'CS', 'KDA','Damage')
                     .addRow('Team Bleu')
                 for (let i = 0; i < res.data.info.participants.length; i++) {
-                    table.addRow(summonerName[i],championName[i], cs[i], kda[i], goldEarned[i], totalDamageDealt[i])
-                    table.setAlign(i, AsciiTable.LEFT)
+                    table.addRow(summonerName[i], championName[i], cs[i], kda[i],totalDamageDealt[i])
+                    table.removeBorder()
                     if (i == 4) {
+                        table.addRow('\u200B')
                         table.addRow('Team Rouge')
                     }
 
                 }
-                
-                if (win) win_ = 'VICTOIRE';
-                else win_ = 'DÉFAITE';
+
+                if (win){
+                    win_ = 'VICTOIRE';
+                    color = '#00ff00';
+                } 
+                else {
+                    win_ = 'DÉFAITE';
+                    color = '#ff0000';
+                }
                 console.log(table.toString())
-                interaction.reply("```"
-                +`𝘔𝘰𝘥𝘦 ${type} \n`
-                +`𝘗𝘢𝘵𝘤𝘩: ${patch} \n`
-                +`𝘋𝘶𝘳𝘦́𝘦 ${minutes}:${seconds} \n`
-                +`${win_} \n`
-                +table.toString()+"```");
                 
+                const exampleEmbed = new MessageEmbed()
+                    .setColor(color)
+                    .setTitle(win_)
+                    .setAuthor({ name: cName, iconURL: `http://ddragon.leagueoflegends.com/cdn/12.4.1/img/profileicon/${iconId}.png`})
+                    .setDescription(`𝗠𝗼𝗱𝗲: ${type} \n𝗣𝗮𝘁𝗰𝗵: ${patch} \n`)
+                    .addFields(
+                        { name: 'Dernière game', value:"```"+`${table.toString()}`+"```"},
+                    )
+                    .setFooter({ text: `𝘋𝘶𝘳𝘦́𝘦 ${minutes}:${seconds} \u200B \u200B \u200B \u200B`});
+                interaction.reply({ embeds: [exampleEmbed] });
+
+
             })
             .catch((err) => {
                 console.error('ERR:', err)
@@ -101,6 +115,7 @@ async function getId(name: any) {
 
     id = data.puuid;
     cName = data.name;
+    iconId = data.profileIconId;
 }
 
 async function getLast(id: any) {
