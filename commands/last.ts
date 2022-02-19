@@ -38,73 +38,69 @@ export default {
 
     callback: async ({ args, interaction }) => {
         await getId(args);
-        console.log(id)
         await getLast(id);
         let url = `https://europe.api.riotgames.com/lol/match/v5/matches/${match}?${riotkey}`
 
-        axios
-            .get(url)
-            .then((res) => {
-                gameDuration = res.data.info.gameDuration;
-                type = res.data.info.gameType;
-                patch = res.data.info.gameVersion;
-                for (let i = 0; i < res.data.info.participants.length; i++) {
-                    if (res.data.info.participants[i].summonerName == cName) {
-                        cNameTeam = res.data.info.participants[i].teamId
-                        win = res.data.info.participants[i].win
-                    }
-                    summonerName[i] = res.data.info.participants[i].summonerName;
-                    championName[i] = res.data.info.participants[i].championName;
-                    cs[i] = res.data.info.participants[i].totalMinionsKilled + res.data.info.participants[i].neutralMinionsKilled;
-                    kda[i] = `${res.data.info.participants[i].kills}/${res.data.info.participants[i].deaths}/${res.data.info.participants[i].assists}`;
-                    totalDamageDealt[i] = res.data.info.participants[i].totalDamageDealtToChampions;
-                    teamId[i] = res.data.info.participants[i].teamId;
+        try {
+            const { data } = await axios.get(url)
+            gameDuration = data.info.gameDuration;
+            type = data.info.gameType;
+            patch = data.info.gameVersion;
+            for (let i = 0; i < data.info.participants.length; i++) {
+                if (data.info.participants[i].summonerName == cName) {
+                    cNameTeam = data.info.participants[i].teamId
+                    win = data.info.participants[i].win
+                }
+                summonerName[i] = data.info.participants[i].summonerName;
+                championName[i] = data.info.participants[i].championName;
+                cs[i] = data.info.participants[i].totalMinionsKilled + data.info.participants[i].neutralMinionsKilled;
+                kda[i] = `${data.info.participants[i].kills}/${data.info.participants[i].deaths}/${data.info.participants[i].assists}`;
+                totalDamageDealt[i] = data.info.participants[i].totalDamageDealtToChampions;
+                teamId[i] = data.info.participants[i].teamId;
+            }
+
+            let minutes = Math.floor(gameDuration / 60);
+            let seconds = gameDuration - minutes * 60;
+
+
+            var table = new AsciiTable()
+            table
+                .setHeading('Joueur', 'Champion', 'CS', 'KDA', 'Damage')
+                .addRow('Team Bleu')
+            for (let i = 0; i < data.info.participants.length; i++) {
+                table.addRow(summonerName[i], championName[i], cs[i], kda[i], totalDamageDealt[i])
+                table.removeBorder()
+                if (i == 4) {
+                    table.addRow('\u200B')
+                    table.addRow('Team Rouge')
                 }
 
-                let minutes = Math.floor(gameDuration / 60);
-                let seconds = gameDuration - minutes * 60;
+            }
 
+            if (win) {
+                win_ = 'VICTOIRE';
+                color = '#00ff00';
+            }
+            else {
+                win_ = 'DÉFAITE';
+                color = '#ff0000';
+            }
 
-                var table = new AsciiTable()
-                table
-                    .setHeading('Joueur', 'Champion', 'CS', 'KDA', 'Damage')
-                    .addRow('Team Bleu')
-                for (let i = 0; i < res.data.info.participants.length; i++) {
-                    table.addRow(summonerName[i], championName[i], cs[i], kda[i], totalDamageDealt[i])
-                    table.removeBorder()
-                    if (i == 4) {
-                        table.addRow('\u200B')
-                        table.addRow('Team Rouge')
-                    }
+            const exampleEmbed = new MessageEmbed()
+                .setColor(color)
+                .setTitle(win_)
+                .setAuthor({ name: cName, iconURL: `http://ddragon.leagueoflegends.com/cdn/12.4.1/img/profileicon/${iconId}.png` })
+                .setDescription(`𝗠𝗼𝗱𝗲: ${type} \n𝗣𝗮𝘁𝗰𝗵: ${patch} \n`)
+                .addFields(
+                    { name: 'Dernière game', value: "```" + `${table.toString()}` + "```" },
+                )
+                .setFooter({ text: `𝘋𝘶𝘳𝘦́𝘦 ${minutes}:${seconds} \u200B \u200B \u200B \u200B` });
+            interaction.reply({ embeds: [exampleEmbed] });
 
-                }
+        } catch (error) {
+            console.error(error);
 
-                if (win) {
-                    win_ = 'VICTOIRE';
-                    color = '#00ff00';
-                }
-                else {
-                    win_ = 'DÉFAITE';
-                    color = '#ff0000';
-                }
-                console.log(table.toString())
-
-                const exampleEmbed = new MessageEmbed()
-                    .setColor(color)
-                    .setTitle(win_)
-                    .setAuthor({ name: cName, iconURL: `http://ddragon.leagueoflegends.com/cdn/12.4.1/img/profileicon/${iconId}.png` })
-                    .setDescription(`𝗠𝗼𝗱𝗲: ${type} \n𝗣𝗮𝘁𝗰𝗵: ${patch} \n`)
-                    .addFields(
-                        { name: 'Dernière game', value: "```" + `${table.toString()}` + "```" },
-                    )
-                    .setFooter({ text: `𝘋𝘶𝘳𝘦́𝘦 ${minutes}:${seconds} \u200B \u200B \u200B \u200B` });
-                interaction.reply({ embeds: [exampleEmbed] });
-
-
-            })
-            .catch((err) => {
-                console.error('ERR:', err)
-            })
+        }
     },
 
 } as ICommand
@@ -112,7 +108,7 @@ export default {
 async function getId(name: any) {
     let url = `https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${name}?${riotkey}`
     let encoded = encodeURI(url)
-    
+
 
     try {
         const { data } = await axios.get(encoded)
