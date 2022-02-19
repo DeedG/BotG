@@ -6,7 +6,7 @@ let id = '';
 let lvl = '';
 let cName = '';
 let iconId = '';
-let couleur : ColorResolvable;
+let couleur: ColorResolvable;
 export default {
     name: 'profile',
     category: 'league',
@@ -33,10 +33,10 @@ export default {
                 .setDescription(data[0].queueType)
                 .setThumbnail(`http://raw.githubusercontent.com/DeedG/BotG/main/ranked-emblems/Emblem_${data[0].tier}.png`)
                 .addFields(
-                    { name: `${data[0].tier} ${data[0].rank} ${data[0].leaguePoints} LP`, value: `${Math.round((data[0].wins/(data[0].wins+data[0].losses))*100)} %` },
+                    { name: `${data[0].tier} ${data[0].rank} ${data[0].leaguePoints} LP`, value: `${Math.round((data[0].wins / (data[0].wins + data[0].losses)) * 100)} %` },
                     { name: 'Victoires', value: `${data[0].wins} V`, inline: true },
                     { name: 'Défaites', value: `${data[0].losses} D`, inline: true },
-                    { name: 'Total', value: `${data[0].wins+data[0].losses} G`, inline: true },
+                    { name: 'Total', value: `${data[0].wins + data[0].losses} G`, inline: true },
                 )
             interaction.reply({ embeds: [exampleEmbed] });
 
@@ -49,29 +49,31 @@ export default {
 
 async function getId(name: any) {
     let url = `https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${name}?${riotkey}`
-
+    id = '';
+    lvl = '';
+    cName = '';
+    iconId = ''
     try {
         const { data } = await axios.get(url)
         id = data.id;
         lvl = data.summonerLevel;
         cName = data.name;
         iconId = data.profileIconId
-        console.log(id)
     } catch (err) {
         console.error(err);
     }
 }
 
 
-function setCouleur(tier:string) {
+function setCouleur(tier: string) {
     console.log(tier)
-    if(tier == 'BRONZE') couleur='#a57164';
-    if(tier == 'SILVER') couleur='#c0c0c0';
-    if(tier == 'GOLD') couleur='#ffd700';
-    if(tier == 'PLATINUM') couleur='#009e9b';
-    if(tier == 'DIAMOND') couleur='#2b2bff';
-    if(tier == 'MASTER') couleur='#800080';
-    if(tier == 'GRANDMASTER') couleur='#fd3a4a';
-    if(tier == 'CHALLENGER') couleur='#f5deb3';
-    
+    if (tier == 'BRONZE') couleur = '#a57164';
+    if (tier == 'SILVER') couleur = '#c0c0c0';
+    if (tier == 'GOLD') couleur = '#ffd700';
+    if (tier == 'PLATINUM') couleur = '#009e9b';
+    if (tier == 'DIAMOND') couleur = '#2b2bff';
+    if (tier == 'MASTER') couleur = '#800080';
+    if (tier == 'GRANDMASTER') couleur = '#fd3a4a';
+    if (tier == 'CHALLENGER') couleur = '#f5deb3';
+
 }
