@@ -25,8 +25,9 @@ let win_ = '';
 let color: ColorResolvable = '#000000';
 let iconId = '';
 export default {
-    category: 'API',
-    description: 'Exemple de requete',
+    name: 'last',
+    category: 'league',
+    description: 'Affiche votre dernière partie',
 
 
     minArgs: 1,
