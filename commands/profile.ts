@@ -1,12 +1,12 @@
 import axios from 'axios'
 import { ICommand } from 'wokcommands'
-import { ColorResolvable, MessageEmbed } from 'discord.js'
+import { Collector, ColorResolvable, MessageEmbed } from 'discord.js'
 const riotkey = process.env.RIOTKEY
 let id = '';
 let lvl = '';
 let cName = '';
 let iconId = '';
-
+let couleur : ColorResolvable;
 export default {
     name: 'profile',
     category: 'league',
@@ -25,8 +25,9 @@ export default {
 
         try {
             const { data } = await axios.get(url)
+            await setCouleur(data[0].tier);
             const exampleEmbed = new MessageEmbed()
-                .setColor('#0000ff')
+                .setColor(couleur)
                 .setTitle('Profile')
                 .setAuthor({ name: cName, iconURL: `http://ddragon.leagueoflegends.com/cdn/12.4.1/img/profileicon/${iconId}.png` })
                 .setDescription(data[0].queueType)
@@ -62,4 +63,15 @@ async function getId(name: any) {
 }
 
 
-
+function setCouleur(tier:string) {
+    console.log(tier)
+    if(tier == 'BRONZE') couleur='#a57164';
+    if(tier == 'SILVER') couleur='#c0c0c0';
+    if(tier == 'GOLD') couleur='#ffd700';
+    if(tier == 'PLATINUM') couleur='#009e9b';
+    if(tier == 'DIAMOND') couleur='#2b2bff';
+    if(tier == 'MASTER') couleur='#800080';
+    if(tier == 'GRANDMASTER') couleur='#fd3a4a';
+    if(tier == 'CHALLENGER') couleur='#f5deb3';
+    
+}
