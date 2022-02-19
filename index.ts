@@ -1,21 +1,24 @@
-import DJS, { Intents } from 'discord.js'
-import WOK from 'wokcommands'
+import DiscordJS, { Intents } from 'discord.js'
+import WOKCommands from 'wokcommands'
 import path from 'path'
 import dotenv from 'dotenv'
 dotenv.config()
-
-const client = new DJS.Client({
-    intents : [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+const client = new DiscordJS.Client({
+  // These intents are recommended for the built in help menu
+  intents: [
+    Intents.FLAGS.GUILDS,
+    Intents.FLAGS.GUILD_MESSAGES,
+    Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+  ],
 })
 
 client.on('ready', () => {
-    new WOK(client, {
-        commandDir: path.join(__dirname, 'commands'),
-        typeScript: true,
-        testServers : ['781891181260439558']
-        
-    })
-    console.log("le bot est on");
+  new WOKCommands(client, {
+    // The name of the local folder for your command files
+    commandsDir: path.join(__dirname, 'commands'),
+    // Allow importing of .ts files if you are using ts-node
+    typeScript: true
+  })
 })
 
 client.login(process.env.TOKEN)
