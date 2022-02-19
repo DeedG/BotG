@@ -1,9 +1,11 @@
 import axios from 'axios'
 import { ICommand } from 'wokcommands'
+import { ColorResolvable, MessageEmbed } from 'discord.js'
 const riotkey = process.env.RIOTKEY
 let id = '';
 let lvl = '';
-let sName = '';
+let cName = '';
+let iconId = '';
 export default {
     category: 'API',
     description: 'Exemple de requete',
@@ -20,25 +22,42 @@ export default {
     callback: async ({ args, interaction }) => {
         await getId(args);
         let url = `https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/${id}?${riotkey}`
-        
-        const { data } = await axios.get(url)
 
-        console.log(data[0]);
-        
-        interaction.reply(`${sName} lvl ${lvl} est classé ${data[0].tier} ${data[0].rank}, ${data[0].wins}W | ${data[0].losses}L`)
+        try {
+            const { data } = await axios.get(url)
+            const exampleEmbed = new MessageEmbed()
+                .setColor('#0000ff')
+                .setTitle('Profile')
+                .setAuthor({ name: cName, iconURL: `http://ddragon.leagueoflegends.com/cdn/12.4.1/img/profileicon/${iconId}.png` })
+                .setDescription(data[0].queueType)
+                .setThumbnail(`http://raw.githubusercontent.com/DeedG/BotG/main/ranked-emblems/Emblem_${data[0].tier}.png`)
+                .addFields(
+                    { name: data[0].tier, value: `${Math.round((data[0].wins/(data[0].wins+data[0].losses))*100)} %` },
+                    { name: 'Victoires', value: `${data[0].wins} V`, inline: true },
+                    { name: 'Défaites', value: `${data[0].losses} D`, inline: true },
+                    { name: 'Total', value: `${data[0].wins+data[0].losses} G`, inline: true },
+                )
+            interaction.reply({ embeds: [exampleEmbed] });
 
+        } catch (err) {
+            console.error(err);
+        }
     },
-    
+
 } as ICommand
 
 async function getId(name: any) {
     let url = `https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${name}?${riotkey}`
-        
-    const { data } = await axios.get(url)
-    console.log(data);
-    id = data.id;
-    lvl = data.summonerLevel;
-    sName = data.name;
+
+    try {
+        const { data } = await axios.get(url)
+        id = data.id;
+        lvl = data.summonerLevel;
+        cName = data.name;
+        iconId = data.profileIconId
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 
