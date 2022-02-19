@@ -32,7 +32,7 @@ export default {
                 .setDescription(data[0].queueType)
                 .setThumbnail(`http://raw.githubusercontent.com/DeedG/BotG/main/ranked-emblems/Emblem_${data[0].tier}.png`)
                 .addFields(
-                    { name: data[0].tier, value: `${Math.round((data[0].wins/(data[0].wins+data[0].losses))*100)} %` },
+                    { name: `${data[0].tier} ${data[0].rank} ${data[0].leaguePoints} LP`, value: `${Math.round((data[0].wins/(data[0].wins+data[0].losses))*100)} %` },
                     { name: 'Victoires', value: `${data[0].wins} V`, inline: true },
                     { name: 'Défaites', value: `${data[0].losses} D`, inline: true },
                     { name: 'Total', value: `${data[0].wins+data[0].losses} G`, inline: true },
